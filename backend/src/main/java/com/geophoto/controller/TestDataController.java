@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/api/test")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
+// CORS is configured globally in SecurityConfig, no need for @CrossOrigin here
 public class TestDataController {
     
     private final PhotoRepository photoRepository;
@@ -85,6 +85,12 @@ public class TestDataController {
         return photo;
     }
 }
+
+
+
+
+
+
 
 
 

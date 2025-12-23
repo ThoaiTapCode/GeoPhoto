@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class PhotoController {
      * Lấy ảnh theo ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<PhotoDTO> getPhotoById(@PathVariable String id) {
+    public ResponseEntity<PhotoDTO> getPhotoById(@PathVariable @NonNull String id) {
         log.info("Fetching photo with id: {}", id);
         PhotoDTO photo = photoService.getPhotoById(id);
         return ResponseEntity.ok(photo);
@@ -128,7 +129,7 @@ public class PhotoController {
      * Xóa ảnh
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePhoto(@PathVariable String id) {
+    public ResponseEntity<Void> deletePhoto(@PathVariable @NonNull String id) {
         log.info("Deleting photo with id: {}", id);
         photoService.deletePhoto(id);
         return ResponseEntity.noContent().build();
@@ -144,7 +145,7 @@ public class PhotoController {
      */
     @PutMapping("/{id}/location")
     public ResponseEntity<?> updatePhotoLocation(
-            @PathVariable String id,
+            @PathVariable @NonNull String id,
             @RequestBody LocationUpdateRequest request) {
         
         log.info("Updating location for photo {}: lat={}, lon={}", 

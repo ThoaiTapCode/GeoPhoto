@@ -1,0 +1,13 @@
+target/
+.mvn/
+mvnw
+mvnw.cmd
+*.iml
+.idea/
+.vscode/
+*.log
+uploads/*
+!uploads/.gitkeep
+.DS_Store
+Thumbs.db
+

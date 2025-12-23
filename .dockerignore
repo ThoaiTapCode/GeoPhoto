@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+!DOCKER.md
+
+# Scripts
+setup.sh
+setup.bat
+*.sh
+*.bat
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker files (don't copy into containers)
+docker-compose.yml
+docker-compose.dev.yml
+Dockerfile*
+.dockerignore
+

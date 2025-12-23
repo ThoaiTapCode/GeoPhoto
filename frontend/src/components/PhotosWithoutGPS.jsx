@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
+import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 import { Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { fetchAllPhotos, updatePhotoLocation } from '../services/photoService'
@@ -64,8 +64,8 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
     const handleMapClick = (e) => {
       // Only handle direct map clicks, not clicks on markers or UI elements
       if (e.originalEvent && e.originalEvent.target.classList.contains('leaflet-container')) {
-        setTempMarkerPosition([e.latlng.lat, e.latlng.lng])
-        setMessage({ type: 'info', text: 'Đã đặt marker. Kéo marker để điều chỉnh vị trí.' })
+      setTempMarkerPosition([e.latlng.lat, e.latlng.lng])
+      setMessage({ type: 'info', text: 'Đã đặt marker. Kéo marker để điều chỉnh vị trí.' })
       }
     }
 

@@ -36,9 +36,10 @@ export const AuthProvider = ({ children }) => {
       return { success: true }
     } catch (error) {
       console.error('Login error:', error)
+      const errorMessage = error.response?.data?.message || error.message || 'Đăng nhập thất bại!'
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Đăng nhập thất bại!' 
+        message: errorMessage
       }
     }
   }
@@ -52,9 +53,10 @@ export const AuthProvider = ({ children }) => {
       return { success: true }
     } catch (error) {
       console.error('Register error:', error)
+      const errorMessage = error.response?.data?.message || error.message || 'Đăng ký thất bại!'
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Đăng ký thất bại!' 
+        message: errorMessage
       }
     }
   }

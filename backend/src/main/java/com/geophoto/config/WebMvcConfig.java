@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.lang.NonNull;
 
 import java.nio.file.Paths;
 
@@ -20,14 +21,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
     
     /**
      * Configure CORS to allow frontend (localhost:5173) to access the API
+     * Note: CORS is also configured in SecurityConfig, this is a fallback
      */
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+    public void addCorsMappings(@NonNull CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowCredentials(true)
+                .maxAge(3600);
     }
     
     /**
@@ -35,11 +38,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
      * Maps /uploads/** URLs to the uploads directory
      */
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String uploadPath = Paths.get(uploadDir).toAbsolutePath().toUri().toString();
+    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
+        // Convert relative path to absolute path and ensure it ends with /
+        java.nio.file.Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        String uploadLocation = "file:" + uploadPath.toString().replace("\\", "/") + "/";
         
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations(uploadPath);
+                .addResourceLocations(uploadLocation);
     }
 }
 

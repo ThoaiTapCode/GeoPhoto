@@ -11,36 +11,98 @@ const API_URL = 'http://localhost:8080/api/auth';
  * Register new user
  */
 export const register = async (username, email, password, fullName) => {
-  const response = await axios.post(`${API_URL}/register`, {
-    username,
-    email,
-    password,
-    fullName
-  });
-  return response.data;
+  try {
+    console.log('Registering user:', { username, email });
+    const response = await axios.post(`${API_URL}/register`, {
+      username,
+      email,
+      password,
+      fullName
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Register response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Register error:', error);
+    if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+      throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.');
+    }
+    // Handle 403 Forbidden
+    if (error.response && error.response.status === 403) {
+      throw new Error('Không có quyền truy cập. Vui lòng kiểm tra cấu hình server.');
+    }
+    // Handle 400 Bad Request (validation errors)
+    if (error.response && error.response.status === 400) {
+      const message = error.response.data?.message || 'Dữ liệu không hợp lệ';
+      throw new Error(message);
+    }
+    // Handle other errors
+    if (error.response && error.response.data) {
+      const message = error.response.data.message || error.response.data;
+      throw new Error(typeof message === 'string' ? message : 'Đăng ký thất bại');
+    }
+    throw error;
+  }
 };
 
 /**
  * Login user
  */
 export const login = async (username, password) => {
-  const response = await axios.post(`${API_URL}/login`, {
-    username,
-    password
-  });
-  
-  if (response.data.token) {
-    // Save token and user info to localStorage
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify({
-      id: response.data.id,
-      username: response.data.username,
-      email: response.data.email,
-      fullName: response.data.fullName
-    }));
+  try {
+    console.log('Logging in user:', { username });
+    const response = await axios.post(`${API_URL}/login`, {
+      username,
+      password
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    console.log('Login response:', response.data);
+    
+    if (response.data.token) {
+      // Save token and user info to localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify({
+        id: response.data.id,
+        username: response.data.username,
+        email: response.data.email,
+        fullName: response.data.fullName
+      }));
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Login error:', error);
+    if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+      throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.');
+    }
+    // Handle 403 Forbidden
+    if (error.response && error.response.status === 403) {
+      throw new Error('Không có quyền truy cập. Vui lòng kiểm tra cấu hình server.');
+    }
+    // Handle 401 Unauthorized
+    if (error.response && error.response.status === 401) {
+      const message = error.response.data?.message || error.response.data || 'Tên đăng nhập hoặc mật khẩu không đúng';
+      throw new Error(typeof message === 'string' ? message : 'Tên đăng nhập hoặc mật khẩu không đúng');
+    }
+    // Handle 400 Bad Request
+    if (error.response && error.response.status === 400) {
+      const message = error.response.data?.message || 'Dữ liệu không hợp lệ';
+      throw new Error(message);
+    }
+    // Handle other errors
+    if (error.response && error.response.data) {
+      const message = error.response.data.message || error.response.data;
+      throw new Error(typeof message === 'string' ? message : 'Đăng nhập thất bại');
+    }
+    throw error;
   }
-  
-  return response.data;
 };
 
 /**
@@ -85,11 +147,18 @@ export const getMe = async () => {
     throw new Error('No authentication token');
   }
   
-  const response = await axios.get(`${API_URL}/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`
+  try {
+    const response = await axios.get(`${API_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+      throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.');
     }
-  });
-  
-  return response.data;
+    throw error;
+  }
 };

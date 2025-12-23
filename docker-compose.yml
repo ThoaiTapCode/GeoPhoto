@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: geophoto-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: geophoto
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - geophoto-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: geophoto-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/geophoto
+      - SPRING_DATA_MONGODB_DATABASE=geophoto
+      - APP_UPLOAD_DIR=/app/uploads
+      - JWT_SECRET=MyVerySecretKeyForGeoPhotoApplicationThatIsLongEnoughForHS512Algorithm
+      - JWT_EXPIRATION=86400000
+    volumes:
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - geophoto-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/auth/me"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Service (Production with Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: geophoto-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - geophoto-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  geophoto-network:
+    driver: bridge
+

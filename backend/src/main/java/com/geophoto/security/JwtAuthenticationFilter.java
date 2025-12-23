@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.lang.NonNull;
 
 import java.io.IOException;
 
@@ -30,11 +31,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
     
+    /**
+     * Skip filter for public endpoints
+     */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, 
-                                    HttpServletResponse response, 
-                                    FilterChain filterChain) 
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        
+        // Skip for OPTIONS requests (CORS preflight)
+        if ("OPTIONS".equals(method)) {
+            return true;
+        }
+        
+        // Skip for public endpoints
+        if (path.startsWith("/api/auth/") || 
+            path.startsWith("/uploads/") || 
+            path.startsWith("/h2-console/")) {
+            logger.info("✅ Skipping JWT filter for public endpoint: {} {}", method, path);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request, 
+                                    @NonNull HttpServletResponse response, 
+                                    @NonNull FilterChain filterChain) 
             throws ServletException, IOException {
+        
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        logger.debug("🔒 JWT filter processing: {} {}", method, path);
         
         try {
             String jwt = parseJwt(request);

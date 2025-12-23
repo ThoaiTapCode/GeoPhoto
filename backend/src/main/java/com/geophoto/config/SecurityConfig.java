@@ -65,12 +65,15 @@ public class SecurityConfig {
                 .sessionManagement(session -> 
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                        // Allow OPTIONS requests for CORS preflight - must be first
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        // Public endpoints - must be before anyRequest()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         // Protected endpoints
                         .requestMatchers("/api/photos/**").authenticated()
+                        // All other requests require authentication
                         .anyRequest().authenticated()
                 );
         
@@ -78,6 +81,8 @@ public class SecurityConfig {
         http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
         
         http.authenticationProvider(authenticationProvider());
+        // Add JWT filter but ensure it doesn't block public endpoints
+        // JWT filter will skip public endpoints internally
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         
         return http.build();

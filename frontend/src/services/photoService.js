@@ -34,11 +34,20 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Unauthorized - redirect to login
+    // Handle connection errors
+    if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+      console.error('Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.')
+      error.message = 'Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.'
+    }
+    
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      // Unauthorized or Forbidden - redirect to login
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/login'
+      // Only redirect if not already on login page
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }

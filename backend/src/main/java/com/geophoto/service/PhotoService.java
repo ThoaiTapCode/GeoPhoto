@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.lang.NonNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -83,7 +84,7 @@ public class PhotoService {
     /**
      * Get photo by ID
      */
-    public PhotoDTO getPhotoById(String id) {
+    public PhotoDTO getPhotoById(@NonNull String id) {
         Photo photo = photoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Photo not found with id: " + id));
         return convertToDTO(photo);
@@ -189,7 +190,7 @@ public class PhotoService {
     /**
      * Delete photo from database and file system
      */
-    public void deletePhoto(String id) {
+    public void deletePhoto(@NonNull String id) {
         Photo photo = photoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Photo not found with id: " + id));
         
@@ -219,7 +220,7 @@ public class PhotoService {
      * Update photo location
      * Dùng để thêm GPS cho ảnh không có GPS
      */
-    public PhotoDTO updatePhotoLocation(String id, Double latitude, Double longitude) {
+    public PhotoDTO updatePhotoLocation(@NonNull String id, Double latitude, Double longitude) {
         Photo photo = photoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Photo not found with id: " + id));
         

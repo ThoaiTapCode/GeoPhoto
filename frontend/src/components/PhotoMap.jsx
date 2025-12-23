@@ -31,10 +31,12 @@ const PhotoMap = () => {
   const defaultCenter = [16.0544, 108.2022]
   const defaultZoom = 6
 
-  // Load photos on component mount
+  // Load photos on component mount (only if user is authenticated)
   useEffect(() => {
-    loadPhotos()
-  }, [])
+    if (user) {
+      loadPhotos()
+    }
+  }, [user])
 
   /**
    * Fetch photos from backend API
@@ -70,8 +72,14 @@ const PhotoMap = () => {
       
     } catch (err) {
       console.error('Lỗi khi tải ảnh:', err)
-      // Only show error if it's a real error, not just empty data
-      if (err.response && err.response.status !== 200) {
+      // Handle authentication errors
+      if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+        setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
+        // Clear invalid token
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        // Redirect will be handled by interceptor
+      } else if (err.response && err.response.status !== 200) {
         setError('Không thể kết nối đến server. Vui lòng thử lại sau.')
       } else {
         setPhotos([])
