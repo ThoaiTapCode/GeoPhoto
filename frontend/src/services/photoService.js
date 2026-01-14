@@ -6,7 +6,7 @@ import { getToken } from './authService'
  * API client for photo-related operations
  */
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -39,7 +39,7 @@ apiClient.interceptors.response.use(
       console.error('Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.')
       error.message = 'Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.'
     }
-    
+
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       // Unauthorized or Forbidden - redirect to login
       localStorage.removeItem('token')

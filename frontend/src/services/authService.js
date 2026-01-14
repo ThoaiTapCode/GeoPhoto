@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/auth';
+const API_URL = '/api/auth';
 
 /**
  * Auth Service
@@ -62,9 +62,9 @@ export const login = async (username, password) => {
         'Content-Type': 'application/json'
       }
     });
-    
+
     console.log('Login response:', response.data);
-    
+
     if (response.data.token) {
       // Save token and user info to localStorage
       localStorage.setItem('token', response.data.token);
@@ -75,7 +75,7 @@ export const login = async (username, password) => {
         fullName: response.data.fullName
       }));
     }
-    
+
     return response.data;
   } catch (error) {
     console.error('Login error:', error);
@@ -146,14 +146,14 @@ export const getMe = async () => {
   if (!token) {
     throw new Error('No authentication token');
   }
-  
+
   try {
     const response = await axios.get(`${API_URL}/me`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
-    
+
     return response.data;
   } catch (error) {
     if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
